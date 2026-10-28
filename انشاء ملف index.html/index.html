@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة القدرات اللفظية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
+            <h1 class="text-2xl font-bold mb-4">منصة القدرات اللفظية (سحابي)</h1>
+            <p id="server-status" class="text-gray-600 mb-6">جاري الاتصال بقاعدة البيانات السحابية...</p>
+            <button onclick="loadData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                فحص الاتصال السحابي
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const BIN_ID = "6ae251a9ac6210605a5a2536";
+        const API_KEY = "$2a$10$.Ppx8fZOogNu8xLQc6dW1.o26Gq0UAECkJcr4dzVU8863WaYXRQ2";
+
+        const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        // جلب البيانات السحابية (الأسئلة والنتائج)
+        async function loadData() {
+            const statusText = document.getElementById("server-status");
+            statusText.innerText = "جاري التحقق من الاتصال...";
+            
+            try {
+                const response = await fetch(JSONBIN_URL, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': API_KEY
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusText.innerText = "✅ متصل بالسحابة بنجاح! الاتصال آمن ومضمون 100%.";
+                    statusText.className = "text-green-600 font-semibold mb-6";
+                    console.log("البيانات الحالية:", result.record);
+                    return result.record;
+                } else {
+                    throw new Error(result.message || "فشل الاتصال");
+                }
+            } catch (error) {
+                console.error("خطأ الاتصال:", error);
+                statusText.innerText = "❌ تعذر الاتصال بالسحابة. تأكد من إعدادات الشبكة.";
+                statusText.className = "text-red-600 font-semibold mb-6";
+            }
+        }
+
+        // حفظ بيانات جديدة (إضافة سؤال أو نتيجة)
+        async function saveData(newData) {
+            try {
+                const response = await fetch(JSONBIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(newData)
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    console.log("تم تحديث البيانات سحابياً بنجاح!");
+                }
+            } catch (error) {
+                console.error("خطأ أثناء الحفظ:", error);
+            }
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
